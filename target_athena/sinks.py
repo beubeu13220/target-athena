@@ -88,7 +88,7 @@ class AthenaSink(BatchSink):
                 object_format,
                 prefix=s3_prefix,
                 timestamp=now,
-                # naming_convention=self.config.get("naming_convention"),
+                naming_convention=self.config.get("naming_convention"),
             )
             if not (filename, target_key) in filenames:
                 filenames.append((filename, target_key))

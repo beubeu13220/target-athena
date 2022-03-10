@@ -57,10 +57,29 @@ def flatten_record(d, parent_key=[], sep="__"):
 
 def get_target_key(stream_name, object_format, prefix="", timestamp=None, naming_convention=None):
     """Creates and returns an S3 key for the message"""
-
     if not timestamp:
-        timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
+        timestamp = datetime.now().strftime('%Y%m%dT%H%M%S')
+    if not naming_convention:
+        naming_convention = f"{stream_name}/{timestamp}.{object_format}"
+    key = naming_convention
 
-    key = f"{prefix}{stream_name}/{timestamp}.{object_format}"
+    # replace simple tokens
+    for k, v in {
+        '{stream}': message['stream'],
+        '{timestamp}': timestamp,
+        '{date}': datetime.now().strftime('%Y-%m-%d'),
+        '{year}': datetime.now().strftime('%Y'),
+        '{month}': datetime.now().strftime('%m'),
+        '{day}': datetime.now().strftime('%d'),
+        '{object_format}': object_format
+    }.items():
+        if k in key:
+            key = key.replace(k, v)
+
+    # replace dynamic tokens
+    # todo: replace dynamic tokens such as {date(<format>)} with the date formatted as requested in <format>
+
+    if prefix:
+        key = f"{prefix}{key}"
 
     return key 
