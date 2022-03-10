@@ -3,6 +3,11 @@ import singer
 from logging import Logger
 from pyathena import connect
 
+MAP_DATA_TYPE = {
+    "INTEGER": "BIGINT",
+    "OBJECT": "STRING",
+    "NUMBER": "DOUBLE"
+}
 
 def create_client(config, logger: Logger):
     """Generates an athena client object
@@ -138,8 +143,8 @@ def generate_column_definitions(schema, level=0):
                     indentation=indentation,
                     name=cleaned_name,
                     separator=type_separator,
-                    type="STRING"
-                    # type=types[0].upper()
+                    # type="STRING"
+                    type=MAP_DATA_TYPE.get(types[0].upper(), types[0].upper())
                 )
             )
         else:
@@ -148,8 +153,8 @@ def generate_column_definitions(schema, level=0):
                     indentation=indentation,
                     name=cleaned_name,
                     separator=type_separator,
-                    # type=attributes['type'].upper()
-                    type="STRING",
+                    type=MAP_DATA_TYPE.get(attributes['type'].upper(), attributes['type'].upper())
+                    #type="STRING",
                 )
             )
     return field_separator.join(field_definitions)

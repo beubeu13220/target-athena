@@ -72,7 +72,7 @@ class AthenaSink(BatchSink):
         records_to_drain = context["records"]
         state = None
         headers = {}
-        headers = self.schema["properties"].keys()
+        # headers = self.schema["properties"].keys()
 
         object_format = self.config.get("object_format")
         delimiter = self.config.get("delimiter", ",")
