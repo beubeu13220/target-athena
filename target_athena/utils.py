@@ -65,7 +65,7 @@ def get_target_key(stream_name, object_format, prefix="", timestamp=None, naming
 
     # replace simple tokens
     for k, v in {
-        '{stream}': message['stream'],
+        '{stream}': stream_name,
         '{timestamp}': timestamp,
         '{date}': datetime.now().strftime('%Y-%m-%d'),
         '{year}': datetime.now().strftime('%Y'),
