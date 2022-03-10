@@ -50,6 +50,16 @@ class AthenaSink(BatchSink):
         return record
 
     @property
+    def max_size(self) -> int:
+        """Get max batch size.
+
+        Returns:
+            Max number of records to batch before `is_full=True`
+        """
+        return self.config.get("batch_size_rows", self.MAX_SIZE_DEFAULT)
+
+
+    @property
     def s3_client(self):
         if not self._s3_client:
             self._s3_client = s3.create_client(self.config)
