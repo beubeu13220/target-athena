@@ -1,19 +1,20 @@
 """Sample Parquet target stream class, which handles writing streams."""
 
-from datetime import datetime
 import csv
 import gzip
 import os
 import shutil
-from typing import List
 import tempfile
-
+from datetime import datetime
+from jsonschema import Draft4Validator, FormatChecker
 from singer_sdk.sinks import BatchSink
+from typing import List, Dict
 
 from target_athena import athena
+from target_athena import formats
 from target_athena import s3
 from target_athena import utils
-from target_athena import formats
+
 
 class AthenaSink(BatchSink):
     """Athena target sink class."""
@@ -30,9 +31,23 @@ class AthenaSink(BatchSink):
         super().__init__(target=target, stream_name=stream_name, schema=schema, key_properties=key_properties)
         self._s3_client = None
         self._athena_client = None
+        self._validator = Draft4Validator(utils.float_to_decimal(self.schema), format_checker=FormatChecker())
 
         ddl = athena.generate_create_database_ddl(self.config["athena_database"])
         athena.execute_sql(ddl, self.athena_client)
+
+    def _validate_and_parse(self, record: Dict) -> Dict:
+        """Validate or repair the record, parsing to python-native types as needed.
+        Args:
+            record: Individual record in the stream.
+        Returns:
+            TODO
+        """
+        self._validator.validate(utils.float_to_decimal(record))
+        self._parse_timestamps_in_record(
+            record=record, schema=self.schema, treatment=self.datetime_error_treatment
+        )
+        return record
 
     @property
     def s3_client(self):
@@ -126,10 +141,13 @@ class AthenaSink(BatchSink):
             database=self.config.get("athena_database",""),
             stream=self.stream_name,
         )  # TODO: double check this
+
+        schema = utils.float_to_decimal(self.schema)
+
         if object_format == 'csv':
             ddl = athena.generate_create_table_ddl(
                 self._clean_table_name(self.stream_name),
-                self.schema,
+                schema,
                 headers=headers,
                 database=self.config.get("athena_database"),
                 data_location=data_location,
@@ -138,7 +156,7 @@ class AthenaSink(BatchSink):
         elif object_format == 'jsonl':
             ddl = athena.generate_create_table_ddl(
                 self._clean_table_name(self.stream_name),
-                self.schema,
+                schema,
                 headers=headers,
                 database=self.config.get("athena_database"),
                 data_location=data_location,
