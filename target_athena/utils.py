@@ -1,13 +1,12 @@
-from datetime import datetime
-import time
-import singer
+import ast
+import collections
 import json
 import re
-import collections
-import inflection
-
-from decimal import Decimal
 from datetime import datetime
+from decimal import Decimal
+
+import inflection
+import singer
 
 logger = singer.get_logger("target_athena")
 
@@ -23,6 +22,18 @@ def float_to_decimal(value):
         return {k: float_to_decimal(v) for k, v in value.items()}
     return value
 
+
+def str_to_dict(value):
+    if isinstance(value, str):
+        try:
+            return ast.literal_eval(value)
+        except:
+            return value
+    if isinstance(value, list):
+        return [str_to_dict(child) for child in value]
+    if isinstance(value, dict):
+        return {k: str_to_dict(v) for k, v in value.items()}
+    return value
 
 # pylint: disable=unnecessary-comprehension
 def flatten_key(k, parent_key, sep):

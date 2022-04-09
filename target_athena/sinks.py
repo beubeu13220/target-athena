@@ -44,7 +44,9 @@ class AthenaSink(BatchSink):
         Returns:
             TODO
         """
-        self._validator.validate(utils.float_to_decimal(record))
+        _record = utils.float_to_decimal(record)
+        _record = utils.str_to_dict(_record)
+        self._validator.validate(_record)
         self._parse_timestamps_in_record(
             record=record, schema=self.schema, treatment=self.datetime_error_treatment
         )
@@ -153,12 +155,10 @@ class AthenaSink(BatchSink):
             stream=self.stream_name,
         )  # TODO: double check this
 
-        schema = utils.float_to_decimal(self.schema)
-
         if object_format == 'csv':
             ddl = athena.generate_create_table_ddl(
                 self._clean_table_name(self.stream_name),
-                schema,
+                self.schema,
                 headers=headers,
                 database=self.config.get("athena_database"),
                 data_location=data_location,
@@ -167,7 +167,7 @@ class AthenaSink(BatchSink):
         elif object_format == 'jsonl':
             ddl = athena.generate_create_table_ddl(
                 self._clean_table_name(self.stream_name),
-                schema,
+                self.schema,
                 headers=headers,
                 database=self.config.get("athena_database"),
                 data_location=data_location,
