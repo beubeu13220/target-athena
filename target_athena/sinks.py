@@ -31,9 +31,8 @@ class AthenaSink(BatchSink):
         super().__init__(target=target, stream_name=stream_name, schema=schema, key_properties=key_properties)
         self._s3_client = None
         self._athena_client = None
-        logging.info(self.schema)
-        logging.info(utils.float_to_decimal(self.schema))
-        self._validator = Draft4Validator(utils.float_to_decimal(self.schema), format_checker=FormatChecker())
+        _format_checker = FormatChecker() if self.config.get("format_checker") is True else None
+        self._validator = Draft4Validator(utils.float_to_decimal(self.schema), format_checker=_format_checker)
 
         ddl = athena.generate_create_database_ddl(self.config["athena_database"])
         athena.execute_sql(ddl, self.athena_client)

@@ -34,6 +34,7 @@ class TargetAthena(Target):
         th.Property("stream_maps", th.ObjectType()),
         th.Property("stream_map_config", th.ObjectType()),
         th.Property("batch_size_rows", th.IntegerType()),
+        th.Property("format_checker", th.BooleanType(), default=True),
     ).to_dict()
     default_sink_class = AthenaSink
 
