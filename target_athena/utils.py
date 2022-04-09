@@ -26,7 +26,8 @@ def float_to_decimal(value):
 def str_to_dict(value):
     if isinstance(value, str):
         try:
-            return ast.literal_eval(value)
+            le = ast.literal_eval(value)
+            return le if isinstance(le, dict) else value
         except:
             return value
     if isinstance(value, list):
