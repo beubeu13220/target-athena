@@ -14,7 +14,7 @@ from target_athena import athena
 from target_athena import formats
 from target_athena import s3
 from target_athena import utils
-
+from singer_sdk.helpers._typing import DatetimeErrorTreatmentEnum
 
 class AthenaSink(BatchSink):
     """Athena target sink class."""
@@ -61,6 +61,14 @@ class AthenaSink(BatchSink):
         """
         return self.config.get("batch_size_rows", self.MAX_SIZE_DEFAULT)
 
+    @property
+    def datetime_error_treatment(self) -> DatetimeErrorTreatmentEnum:
+        """Return a treatment to use for datetime parse errors: ERROR. MAX, or NULL.
+
+        Returns:
+            TODO
+        """
+        return DatetimeErrorTreatmentEnum.NULL
 
     @property
     def s3_client(self):
