@@ -32,7 +32,10 @@ class AthenaSink(BatchSink):
         self._s3_client = None
         self._athena_client = None
         _format_checker = FormatChecker() if self.config.get("format_checker") is True else None
-        self._validator = Draft4Validator(utils.float_to_decimal(self.schema), format_checker=_format_checker)
+        _schema = utils.float_to_decimal(self.schema)
+        _schema["properties"] = dict(utils.replace_object_to_str(schema["properties"]))
+        # parse all object to string
+        self._validator = Draft4Validator(_schema, format_checker=_format_checker)
 
         ddl = athena.generate_create_database_ddl(self.config["athena_database"])
         athena.execute_sql(ddl, self.athena_client)
@@ -44,9 +47,7 @@ class AthenaSink(BatchSink):
         Returns:
             TODO
         """
-        _record = utils.float_to_decimal(record)
-        _record = utils.str_to_dict(_record)
-        self._validator.validate(_record)
+        self._validator.validate(utils.float_to_decimal(record))
         self._parse_timestamps_in_record(
             record=record, schema=self.schema, treatment=self.datetime_error_treatment
         )

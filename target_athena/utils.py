@@ -23,18 +23,12 @@ def float_to_decimal(value):
     return value
 
 
-def str_to_dict(value):
-    if isinstance(value, str):
-        try:
-            le = ast.literal_eval(value)
-            return le if isinstance(le, dict) else value
-        except:
-            return value
-    if isinstance(value, list):
-        return [str_to_dict(child) for child in value]
-    if isinstance(value, dict):
-        return {k: str_to_dict(v) for k, v in value.items()}
-    return value
+def replace_object_to_str(schema):
+    for col in schema.items():
+        colname = col[0]
+        property = col[1]
+        yield colname, property | {"type": ["string" if type == "object" else type for type in property["type"]]}
+
 
 # pylint: disable=unnecessary-comprehension
 def flatten_key(k, parent_key, sep):
@@ -94,4 +88,4 @@ def get_target_key(stream_name, object_format, prefix="", timestamp=None, naming
     if prefix:
         key = f"{prefix}{key}"
 
-    return key 
+    return key
