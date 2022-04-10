@@ -27,7 +27,7 @@ def replace_object_to_str(schema):
     for col in schema.items():
         colname = col[0]
         property = col[1]
-        yield colname, property | {"type": ["string" if type == "object" else type for type in property["type"]]}
+        yield colname, {**property, **{"type": ["string" if type == "object" else type for type in property["type"]]}}
 
 
 # pylint: disable=unnecessary-comprehension

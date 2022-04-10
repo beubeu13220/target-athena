@@ -33,7 +33,7 @@ class AthenaSink(BatchSink):
         self._athena_client = None
         _format_checker = FormatChecker() if self.config.get("format_checker") is True else None
         _schema = utils.float_to_decimal(self.schema)
-        _schema["properties"] = dict(utils.replace_object_to_str(schema["properties"]))
+        _schema["properties"] = dict(utils.replace_object_to_str(_schema["properties"]))
         # parse all object to string
         self._validator = Draft4Validator(_schema, format_checker=_format_checker)
 
